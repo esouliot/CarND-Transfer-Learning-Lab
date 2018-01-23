@@ -1,6 +1,10 @@
 import pickle
 import tensorflow as tf
+import numpy as np
 # TODO: import Keras layers you need here
+from keras.models import Sequential
+from keras.layers.core import Dense, Activation, Flatten
+
 
 flags = tf.app.flags
 FLAGS = flags.FLAGS
@@ -46,9 +50,24 @@ def main(_):
     # the dataset
     # 10 for cifar10
     # 43 for traffic
+    
+    nlabels = 43
+    
+    model = Sequential()
+    model.add(Flatten(input_shape = X_train.shape[1:]))
+    model.add(Dense(nlabels))
+    model.add(Activation('softmax'))
+    model.compile(optimizer = 'adam', loss = 'sparse_categorical_crossentropy', metrics = ['accuracy'])
+    
 
     # TODO: train your model here
-
+    history = model.fit(X_train, y_train, batch_size = 128, nb_epoch = 50)
+    metrics = model.evaluate(x = X_val, y = y_val)
+    
+    for metric_i in range(len(model.metrics_names)):
+        metric_name = model.metrics_names[metric_i]
+        metric_value = metrics[metric_i]
+        print('{}: {}'.format(metric_name, metric_value))
 
 # parses flags and calls the `main` function above
 if __name__ == '__main__':
